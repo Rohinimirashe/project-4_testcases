@@ -1,13 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const shortid = require('shortid');
 
-const {  createUrl} = require("../controller/urlController")
+const { createUrl,getUrl } = require("../controller/urlController")
 
+ router.post('/url/shorten', createUrl);
+ router.get('/:urlCode', getUrl);
 
-router.post('/short', )
-
-//==Login User
-//router.get('/login', loginUser)
-
-module.exports = router;
+module.exports =  router;
