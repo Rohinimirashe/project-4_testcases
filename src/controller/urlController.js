@@ -1,21 +1,65 @@
 const urlModel = require("../model/urlModel");
 
-const createUrl = async function (req, res) {
-    try {
+// const createUrl = async function (req, res) {
+//     try {
        
-        let requestBody = req.body
+//         let requestBody = req.body
         
-        const urlData = { };
-        const saveUrl = await urlModel.create(urlData)
+//         const urlData = { };
+//         const saveUrl = await urlModel.create(urlData)
         
 
   
 
-        return res.status(201).send({ status: true, message: "Success", data: saveUrl })
+//         return res.status(201).send({ status: true, message: "Success", data: saveUrl })
 
+//     } catch (err) {
+//         return res.status(500).send({ status: false, error: err.message })
+//     }
+
+// }
+
+
+const Express = require('express');
+const router = Express.Router();
+const shortid = require('shortid');
+//const Url = require('../models/Url');
+//const utils = require('../utils/utils');
+require('dotenv').config({ path: '../config/.env' });
+
+// Short URL Generator
+router.post('/short', async (req, res) => {
+  const { origUrl } = req.body;
+  const base = process.env.BASE;
+
+  const urlId = shortid.generate();
+  if (utils.validateUrl(origUrl)) {
+    try {
+      let url = await Url.findOne({ origUrl });
+      if (url) {
+        res.json(url);
+      } else {
+        const shortUrl = `${base}/${urlId}`;
+
+        url = new Url({
+          origUrl,
+          shortUrl,
+          urlId,
+          date: new Date(),
+        });
+
+        await url.save();
+        res.json(url);
+      }
     } catch (err) {
-        return res.status(500).send({ status: false, error: err.message })
+      console.log(err);
+      res.status(500).json('Server Error');
     }
+  } else {
+    res.status(400).json('Invalid Original Url');
+  }
+});
 
-}
-module.exports = { createUrl}
+
+
+module.exports = router;
