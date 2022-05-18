@@ -1,7 +1,32 @@
 const urlModel = require('../model/urlModel')
 const validUrl = require('valid-url');
 const shortId = require('shortid')  
-    
+const redis = require("redis");
+
+const { promisify } = require("util");
+
+//Connect to redis
+const redisClient = redis.createClient(
+  16134,
+  "redis-16134.c212.ap-south-1-1.ec2.cloud.redislabs.com",
+  { no_ready_check: true }
+);
+redisClient.auth("luKhXEybyJGwsvCRNQVnqECWfiU6l9Ex", function (err) {
+  if (err) throw err;
+});
+
+redisClient.on("connect", async function () {
+  console.log("Connected to Redis..");
+});
+
+//1. connect to the server
+//2. use the commands :
+
+//Connection setup for redis
+
+const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+
 
 let createUrl = async (req, res) => {
 
@@ -22,7 +47,7 @@ let createUrl = async (req, res) => {
     
         let url= await urlModel.findOne({longUrl: data.longUrl})
         if(url){
-            return res.status(400).send({status:false, message:"url is alredy present in db"})
+            return res.status(409).send({status:false, message:"url is alredy present in db"})
         }
     
         const baseUrl = 'http://localhost:3000'
@@ -31,6 +56,8 @@ let createUrl = async (req, res) => {
     
         data.urlCode=urlCode;
         data.shortUrl=shortUrl;
+
+        //data[urlCode]=urlCode
     
         await urlModel.create(data)
         let bodyData =await urlModel.findOne({urlCode:urlCode}).select({_id:0, __v:0, createdAt:0, updatedAt:0})
@@ -41,7 +68,17 @@ let createUrl = async (req, res) => {
           
       }
     }
-
+    const fetchAuthorProfile = async function (req, res) {
+      let cahcedProfileData = await GET_ASYNC(`${req.params.authorId}`)
+      if(cahcedProfileData) {
+        res.send(cahcedProfileData)
+      } else {
+        let profile = await authorModel.findById(req.params.authorId);
+        await SET_ASYNC(`${req.params.authorId}`, JSON.stringify(profile))
+        res.send({ data: profile });
+      }
+    
+    };
 
 
 let getUrl = async (req, res) => {
