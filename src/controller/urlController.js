@@ -53,7 +53,7 @@ let createUrl = async(req, res) => {
             return res.status(400).send({ status: false, message: "Please give the long URL" })
         }
 
-        if (!validUrl.isUri(longUrl)) {
+        if (!validUrl.isWebUri(longUrl.trim())) {
             return res.status(400).send({ status: false, message: "please enter a valid long url" })
         }
 

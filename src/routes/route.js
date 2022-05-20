@@ -1,10 +1,12 @@
+// express is an server-side web framework for node.js which execute our code on the web
 const express = require('express');
-const router = express.Router();
+const router = express.Router(); //used express to create route handlers
 
-const { createUrl,getUrl } = require("../controller/urlController")
+//import controller
+const { createUrl, getUrl } = require("../controller/urlController")
 
 
- router.post('/url/shorten', createUrl);
- router.get('/:urlCode', getUrl);
+router.post('/url/shorten', createUrl);
+router.get('/:urlCode', getUrl);
 
-module.exports =  router;
+module.exports = router;
